@@ -1,6 +1,11 @@
-
-import React, { useEffect } from 'react';
-import { CheckCircle, UserCheck, Shield, FileText, CircleDollarSign } from 'lucide-react';
+import React, { useEffect } from "react";
+import {
+  CheckCircle,
+  UserCheck,
+  Shield,
+  FileText,
+  CircleDollarSign,
+} from "lucide-react";
 
 const FeaturesSection = () => {
   useEffect(() => {
@@ -8,23 +13,23 @@ const FeaturesSection = () => {
       (entries) => {
         entries.forEach((entry) => {
           if (entry.isIntersecting) {
-            entry.target.classList.add('animate-reveal');
+            entry.target.classList.add("animate-reveal");
           }
         });
       },
       {
         root: null,
-        rootMargin: '0px',
+        rootMargin: "0px",
         threshold: 0.1,
       }
     );
 
-    document.querySelectorAll('.feature-animate').forEach((element) => {
+    document.querySelectorAll(".feature-animate").forEach((element) => {
       observer.observe(element);
     });
 
     return () => {
-      document.querySelectorAll('.feature-animate').forEach((element) => {
+      document.querySelectorAll(".feature-animate").forEach((element) => {
         observer.unobserve(element);
       });
     };
@@ -38,7 +43,8 @@ const FeaturesSection = () => {
             Powering Your Financial Journey
           </h2>
           <p className="text-foreground/70 max-w-2xl mx-auto">
-            Our comprehensive platform simplifies complex financial processes into seamless experiences.
+            Our comprehensive platform simplifies complex financial processes
+            into seamless experiences.
           </p>
         </div>
 
@@ -48,9 +54,13 @@ const FeaturesSection = () => {
               <div className="h-14 w-14 rounded-full bg-accent/10 flex items-center justify-center mb-6">
                 <UserCheck className="h-7 w-7 text-accent" />
               </div>
-              <h3 className="text-xl font-semibold mb-3">Streamlined KYC Verification</h3>
+              <h3 className="text-xl font-semibold mb-3">
+                Streamlined KYC Verification
+              </h3>
               <p className="text-foreground/70">
-                Our advanced verification system reduces the traditional KYC process from days to just minutes. Upload documents securely and get verified quickly.
+                Our advanced verification system reduces the traditional KYC
+                process from days to just minutes. Upload documents securely and
+                get verified quickly.
               </p>
             </div>
             <ul className="space-y-3">
@@ -74,9 +84,13 @@ const FeaturesSection = () => {
               <div className="h-14 w-14 rounded-full bg-accent/10 flex items-center justify-center mb-6">
                 <FileText className="h-7 w-7 text-accent" />
               </div>
-              <h3 className="text-xl font-semibold mb-3">Hassle-free Loan Applications</h3>
+              <h3 className="text-xl font-semibold mb-3">
+                Hassle-free Loan Applications
+              </h3>
               <p className="text-foreground/70">
-                Apply for loans with minimal paperwork. Our system pre-fills information from your KYC, making the application process smooth and efficient.
+                Apply for loans with minimal paperwork. Our system pre-fills
+                information from your KYC, making the application process smooth
+                and efficient.
               </p>
             </div>
             <ul className="space-y-3">
@@ -100,9 +114,13 @@ const FeaturesSection = () => {
               <div className="h-14 w-14 rounded-full bg-accent/10 flex items-center justify-center mb-6">
                 <CircleDollarSign className="h-7 w-7 text-accent" />
               </div>
-              <h3 className="text-xl font-semibold mb-3">Automated Mandate Management</h3>
+              <h3 className="text-xl font-semibold mb-3">
+                Automated Mandate Management
+              </h3>
               <p className="text-foreground/70">
-                Set up automated payment mandates securely. Our system handles recurring payments seamlessly while maintaining compliance with regulations.
+                Set up automated payment mandates securely. Our system handles
+                recurring payments seamlessly while maintaining compliance with
+                regulations.
               </p>
             </div>
             <ul className="space-y-3">
@@ -119,21 +137,6 @@ const FeaturesSection = () => {
                 <span className="text-sm">Modification flexibility</span>
               </li>
             </ul>
-          </div>
-
-          <div className="md:col-span-3 mt-12 feature-animate">
-            <div className="bg-accent/5 border border-accent/20 rounded-xl p-8">
-              <div className="flex flex-col md:flex-row items-center justify-between gap-6">
-                <div className="flex items-center">
-                  <Shield className="h-12 w-12 text-accent mr-4" />
-                  <div>
-                    <h3 className="text-xl font-semibold">Bank-Level Security</h3>
-                    <p className="text-foreground/70">Your data is protected with advanced encryption and security protocols.</p>
-                  </div>
-                </div>
-                <span className="text-3xl font-bold text-accent">256-bit Encryption</span>
-              </div>
-            </div>
           </div>
         </div>
       </div>

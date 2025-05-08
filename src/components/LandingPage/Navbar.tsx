@@ -35,8 +35,7 @@ const Navbar = () => {
       <div className="container mx-auto px-4 md:px-6 flex items-center justify-between relative">
         {/* Left: Logo */}
         <a href="#" className="flex items-center space-x-2 z-10">
-          <CircleDollarSign className="h-6 w-6 text-accent" />
-          <span className="font-bold text-xl">AMandate Flow</span>
+          <span className="font-bold text-xl">Autonance</span>
         </a>
 
         {/* Center: Navigation Links (Desktop) */}
