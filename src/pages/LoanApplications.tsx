@@ -52,68 +52,98 @@ interface LoanApplication {
   mandateStatus: string | null;
 }
 
+interface IMandateApplication {
+  id: number;
+  loanId: number;
+  userId: number;
+  bankAccountId: number;
+  status: "PENDING" | "APPROVED" | "REJECTED" | string;
+  mandateVariant: string;
+  category: string;
+  debitType: string;
+  seqType: string;
+  freqType: string;
+  schemaName: string;
+  consRefNo: string;
+  amount: number;
+  startDate: string;     
+  uptoDate: string;      
+  upTo40Years: boolean;
+  createdAt: number;     
+  updatedAt: number;
+  predictionStatus: "APPROVED" | "REJECTED" | "PENDING" | string;
+  predictionProbability: number;
+}
+
 const LoanApplicationsPage = () => {
   const navigate = useNavigate();
 
   const { user } = useSelector((state: any) => state.user) || {};
   const userId = user?.id;
   const [applications, setApplications] = useState<LoanApplication[]>([]);
+  const [mandateApplications, setMandateApplications] = useState<IMandateApplication[]>([]);
   const [loading, setLoading] = useState(false);
 
-  useEffect(() => {
-    const fetchLoanApplications = async () => {
-      try {
-        setLoading(true);
-        const response = await fetch(
-          `http://localhost:8080/api/loans/user/${userId}`
-        );
+  // 1. Fetch loans on userId change
+useEffect(() => {
+  const fetchLoanApplications = async () => {
+    try {
+      setLoading(true);
+      const response = await fetch(`http://localhost:8080/api/loans/user/${userId}`);
+      const data = await response.json();
+      const apps = Array.isArray(data) ? data : [data];
 
-        if (!response.ok) {
-          throw new Error("Failed to fetch loan applications");
-        }
-
-        const data = await response.json();
-        const apps = Array.isArray(data) ? data : [data];
-
-        console.log("Loan Applications:", apps);
-
-        // Check mandate status for each loan and attach result to each app
-        const appsWithMandateStatus = await Promise.all(
-          apps.map(async (loan: any) => {
-            try {
-              const { data } = await axios.get(
-                `http://localhost:8080/api/mandates/loan/${loan.id}`
-              );
-              console.log("loan id is " + loan.id, data);
-
-              if (data.length === 0) {
-                loan.mandateStatus = null; // No mandate exists
-              } else {
-                // Assuming the mandate response has a status field
-                // Update this according to your actual API response structure
-                loan.mandateStatus = data[0].status || "ACTIVE";
-              }
-            } catch (error) {
-              console.error("Error fetching mandate status:", error);
-              loan.mandateStatus = null;
-            }
-            return loan;
-          })
-        );
-
-        setApplications(appsWithMandateStatus);
-      } catch (error) {
-        console.error("Error fetching loan applications:", error);
-        toast.error("Failed to load your loan applications. Please try again.");
-      } finally {
-        setLoading(false);
-      }
-    };
-
-    if (userId) {
-      fetchLoanApplications();
+      // Set without mandateStatus for now
+      setApplications(apps);
+    } catch (error) {
+      toast.error("Failed to load loan applications.");
+    } finally {
+      setLoading(false);
     }
-  }, [userId]);
+  };
+
+  if (userId) fetchLoanApplications();
+}, [userId]);
+
+// 2. Fetch mandates separately
+useEffect(() => {
+  const fetchMandateApplications = async () => {
+    try {
+      setLoading(true);
+      const response = await fetch(`http://localhost:8080/api/mandates/user/${userId}`);
+      const data = await response.json();
+      const mandates = Array.isArray(data) ? data : [data];
+
+      setMandateApplications(mandates);
+    } catch (error) {
+      toast.error("Failed to load mandates.");
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  if (userId) fetchMandateApplications();
+}, [userId]);
+
+// 3. Run the matching once both data sets are available
+useEffect(() => {
+  if (applications.length > 0 && mandateApplications.length > 0) {
+    const updatedApps = applications.map((loan) => {
+      const matchingMandate = mandateApplications.find(
+        (mandate) => mandate.loanId === loan.id && mandate.userId == loan.userId
+      );
+
+      return {
+        ...loan,
+        mandateStatus: matchingMandate ? matchingMandate.status : "Not Available",
+      };
+    });
+
+    setApplications(updatedApps);
+  }
+}, [applications.length, mandateApplications.length]);
+
+  
 
   console.log(applications);
 
@@ -274,16 +304,13 @@ const LoanApplicationsPage = () => {
                         {formatDate(application.nextEmiDate)}
                       </span>
                     </div>
-                    {application.mandateStatus && (
-                      <div className="flex justify-between">
-                        <span className="text-muted-foreground">
-                          Mandate Status
-                        </span>
-                        <span className="font-medium">
-                          {application.mandateStatus}
-                        </span>
-                      </div>
-                    )}
+                    <div className="flex justify-between">
+                    <span className="text-muted-foreground">Mandate Status</span>
+                      <span className="font-medium">
+                        {application.mandateStatus || "Not Available"}
+                      </span>
+                    </div>
+
                   </div>
                 </CardContent>
                 <CardFooter className="bg-muted/10 pt-3">
@@ -346,39 +373,20 @@ const LoanApplicationsPage = () => {
                         {(application.defaultRiskProbability * 100).toFixed(2)}%
                       </TableCell>
                       <TableCell className="text-right">
-                        {application.status === "APPROVED" && !application.mandateStatus ? (
-                          <Button
-                            onClick={() => applyMandate(application.id)}
-                            size="sm"
-                          >
-                            Apply Mandate
-                          </Button>
-                        ) : application.status === "PENDING" ? (
-                          <p className="text-yellow-600 font-medium text-sm">
-                            Awaiting approval
-                          </p>
-                        ) : application.status === "REJECTED" ? (
-                          <p className="text-red-600 font-medium text-sm">
-                            Not eligible
-                          </p>
-                        ) : application.mandateStatus ? (
-                          <Button
-                            variant="outline"
-                            size="sm"
-                            onClick={() => applyMandate(application.id)}
-                          >
-                            View Details
-                          </Button>
-                        ) : (
-                          <Button
-                            variant="outline"
-                            size="sm"
-                            onClick={() => applyMandate(application.id)}
-                          >
-                            View Details
-                          </Button>
-                        )}
-                      </TableCell>
+                          {application.status === "APPROVED" && application.mandateStatus === "Not Available" ? (
+                            <Button onClick={() => applyMandate(application.id)} size="sm">
+                              Apply Mandate
+                            </Button>
+                          ) : application.status === "REJECTED" || application.mandateStatus === "REJECTED" ? (
+                            <p className="text-red-600 font-medium text-sm">Not eligible</p>
+                          ) : application.status === "PENDING" || application.mandateStatus === "PENDING" ? (
+                            null
+                          ) : application.mandateStatus === "Not Available" ? (
+                            <Button variant="outline" size="sm" onClick={() => applyMandate(application.id)}>
+                              View Details
+                            </Button>
+                          ) : null}
+                        </TableCell>
                     </TableRow>
                   ))}
                 </TableBody>
